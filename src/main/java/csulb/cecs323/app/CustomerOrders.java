@@ -103,26 +103,37 @@ public class CustomerOrders {
       customerOrders.createEntity (customers);
       String com = "Y";
       while (Objects.equals(com, "Y")){
-         System.out.println("What customer would you like to see? (Number from 1 - "+ customers.size() +")");
+         System.out.println("What sales rep would you like to see? (Number from 1 - "+ customers.size() +")");
 //         @NamedNativeQuery(
 //                 name  = "getAllEmployees",
 //                 query = "SELECT firstName, lastName" +
 //                         "FROM Customers",
 //                 resultClass=Customers.class)
          System.out.println(customers);
-         int customer = getInt();
-         System.out.println(products);
-         System.out.println("What product would you like to see?(1 - *)");
-         int product = getInt();
+         int customer = getIntRange(1, customers.size());
          System.out.println("Please input information about your order.");
          System.out.println("Who's placing the order?");
          String identity = getString();
+         System.out.println(products);
+         System.out.println("What product would you like to see?(1 - *)");
+         int productChoice = getIntRange(1, products.size());
+         Products p = products.get(productChoice - 1);
+         if (p.getUnits_in_stock() == 0){
+            while (p.getUnits_in_stock() == 0){
+               System.out.println("We don't have any more of " + p.getProd_name());
+               System.out.println("Please choose something else.");
+               products.remove(productChoice-1);
+               System.out.println(products);
+
+               productChoice = getIntRange(1,products.size());
+               p = products.get(productChoice - 1);
+            }
+         }
          LocalDateTime time = LocalDateTime.now();
-         orders.add(new Orders(customers.get(customer - 1),time,"Diego"));
-         Products p = products.get(product - 1);
+         orders.add(new Orders(customers.get(customer - 1),time,identity));
          System.out.println("How many of the products would you like to order?");
          int numOrders = getInt();
-         if (p.getUnits_in_stock() < numOrders){
+         if (p.getUnits_in_stock() < numOrders && p.getUnits_in_stock() != 0){
             System.out.println("We only have this many in stock. " + p.getUnits_in_stock());
             numOrders = p.getUnits_in_stock();
          }
@@ -155,6 +166,25 @@ public class CustomerOrders {
       LOGGER.fine("End of Transaction");
 
    } // End of the main method
+   public static int getIntRange( int low, int high ) {
+      Scanner in = new Scanner( System.in );
+      int input = 0;
+      boolean valid = false;
+      while( !valid ) {
+         if( in.hasNextInt() ) {
+            input = in.nextInt();
+            if( input <= high && input >= low ) {
+               valid = true;
+            } else {
+               System.out.println( "Invalid Range." );
+            }
+         } else {
+            in.next(); //clear invalid string
+            System.out.println( "Invalid Input." );
+         }
+      }
+      return input;
+   }
 
    public static int getInt() {
       Scanner in = new Scanner(System.in);
