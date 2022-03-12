@@ -53,6 +53,8 @@ public class Order_lines {
      */
     private double unit_sale_price;
 
+    public Order_lines() {}
+
     public Orders getOrder() {
         return order;
     }
@@ -83,6 +85,12 @@ public class Order_lines {
 
     public void setUnit_sale_price(double unit_sale_price) {
         this.unit_sale_price = unit_sale_price;
+    }
+
+    public Order_lines (Products p, Orders o, int q){
+        this.product = p;
+        this.order = o;
+        this.quantity = q;
     }
 
     public boolean equals (Object o) {

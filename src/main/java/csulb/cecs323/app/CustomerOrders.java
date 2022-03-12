@@ -15,10 +15,10 @@ package csulb.cecs323.app;
 // Import all of the entity classes that we have written for this application.
 import csulb.cecs323.model.*;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Scanner;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -73,13 +73,15 @@ public class CustomerOrders {
       EntityManager manager = factory.createEntityManager();
       // Create an instance of CustomerOrders and store our new EntityManager as an instance variable.
       CustomerOrders customerOrders = new CustomerOrders(manager);
-
-
       // Any changes to the database need to be done within a transaction.
       // See: https://en.wikibooks.org/wiki/Java_Persistence/Transactions
 
       LOGGER.fine("Begin of Transaction");
       EntityTransaction tx = manager.getTransaction();
+
+
+
+
 
       tx.begin();
       // List of Products that I want to persist.  I could just as easily done this with the seed-data.sql
@@ -87,8 +89,62 @@ public class CustomerOrders {
       // Load up my List with the Entities that I want to persist.  Note, this does not put them
       // into the database.
       products.add(new Products("076174517163", "16 oz. hickory hammer", "Stanely Tools", "1", 9.97, 50));
+      products.add(new Products("012345678910", "4-Volt Max 1/4-in Cordless Screwdriver", "Craftsman", "2", 29.98, 15));
+      products.add(new Products("052GBA892003", "4-Volt 1/4-in Cordless Screwdriver", "WORX", "3", 43.44, 20));
+      products.add(new Products("BRU852024801", "Steel Head Fiberglass Sledge Hammer", "Kobalt", "4", 19.98, 42));
       // Create the list of owners in the database.
       customerOrders.createEntity (products);
+      List <Customers> customers = new ArrayList<Customers>();
+      List <Order_lines> orderlines = new ArrayList<Order_lines>();
+      customers.add((new Customers("Garcia","Diego","1296 Temple Ave.","90803","5627196643")));
+      customers.add((new Customers("Armando","Bloom","4312 Cowboy Rd.","85924","5628195230")));
+      customers.add((new Customers("Grando","Ralph","1234 Phillipains","74920","8194442234")));
+      String com = "Y";
+      while (Objects.equals(com, "Y")){
+         System.out.println("What customer would you like to see? (Number from 1 - )");
+//         @NamedNativeQuery(
+//                 name  = "getAllEmployees",
+//                 query = "SELECT firstName, lastName" +
+//                         "FROM Customers",
+//                 resultClass=Customers.class)
+         System.out.println(customers);
+         int customer = getInt();
+         System.out.println(products);
+         System.out.println("What product would you like to see?(1 - *)");
+         int product = getInt();
+         System.out.println("Please input information about your order.");
+         System.out.println("Who's placing the order?");
+         String identity = getString();
+         LocalDateTime time = LocalDateTime.now();
+         Orders o = new Orders(customers.get(customer - 1),time,"Diego");
+         Products p = products.get(product - 1);
+         System.out.println("How many of the products would you like to order?");
+         int numOrders = getInt();
+         if (p.getUnits_in_stock() < numOrders){
+            System.out.println("We only have this many in stock. " + p.getUnits_in_stock());
+            numOrders = p.getUnits_in_stock();
+         }
+         double price = p.getUnit_list_price();
+         double total = price * numOrders;
+         if (com.equals("Y")){
+            System.out.println("This is your total: " + total);
+
+            System.out.println("Would you like to continue with this purchase? (Y/N)");
+            com = getString();
+         }
+         if (com.equals("N")){
+            break;
+         }
+         p.setUnits_in_stock(p.getUnits_in_stock() - numOrders);
+
+
+         orderlines.add(new Order_lines(p,o,numOrders));
+         System.out.println("Would you like to continue? (Y/N)");
+         com = getString();
+      }
+      customerOrders.createEntity (customers);
+      customerOrders.createEntity(orderlines);
+
 
       // Commit the changes so that the new data persists and is visible to other users.
       tx.commit();
@@ -96,6 +152,32 @@ public class CustomerOrders {
 
    } // End of the main method
 
+   public static int getInt() {
+      Scanner in = new Scanner(System.in);
+      int input = 0;
+      boolean valid = false;
+      while (!valid) {
+         if (in.hasNextInt()) {
+            input = in.nextInt();
+            valid = true;
+         } else {
+            in.next(); //clear invalid string
+            System.out.println("Invalid Input.");
+         }
+      }
+      return input;
+   }
+
+   public static String getString() {
+      Scanner in = new Scanner( System.in );
+      String input = in.nextLine();
+      return input;
+   }
+   public static void printList(List<Customers> c){
+      for (int i = 0; i<1; i++){
+         System.out.println(c);
+      }
+   }
    /**
     * Create and persist a list of objects to the database.
     * @param entities   The list of entities to persist.  These can be any object that has been
@@ -136,5 +218,6 @@ public class CustomerOrders {
          // Return the style object that they asked for.
          return products.get(0);
       }
+
    }// End of the getStyle method
 } // End of CustomerOrders class
