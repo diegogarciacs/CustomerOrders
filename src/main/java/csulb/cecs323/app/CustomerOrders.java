@@ -96,10 +96,13 @@ public class CustomerOrders {
       customerOrders.createEntity (products);
       List <Customers> customers = new ArrayList<Customers>();
       List <Order_lines> orderlines = new ArrayList<Order_lines>();
+      List <Orders> orders = new ArrayList<Orders>();
       customers.add((new Customers("Garcia","Diego","1296 Temple Ave.","90803","5627196643")));
       customers.add((new Customers("Armando","Bloom","4312 Cowboy Rd.","85924","5628195230")));
       customers.add((new Customers("Grando","Ralph","1234 Phillipains","74920","8194442234")));
       String com = "Y";
+
+
       while (Objects.equals(com, "Y")){
          System.out.println("What customer would you like to see? (Number from 1 - )");
 //         @NamedNativeQuery(
@@ -116,7 +119,7 @@ public class CustomerOrders {
          System.out.println("Who's placing the order?");
          String identity = getString();
          LocalDateTime time = LocalDateTime.now();
-         Orders o = new Orders(customers.get(customer - 1),time,"Diego");
+         orders.add(new Orders(customers.get(customer - 1),time,"Diego"));
          Products p = products.get(product - 1);
          System.out.println("How many of the products would you like to order?");
          int numOrders = getInt();
@@ -138,12 +141,13 @@ public class CustomerOrders {
          p.setUnits_in_stock(p.getUnits_in_stock() - numOrders);
 
 
-         orderlines.add(new Order_lines(p,o,numOrders));
+         orderlines.add(new Order_lines(p,orders.get(orders.size()-1),numOrders));
          System.out.println("Would you like to continue? (Y/N)");
          com = getString();
       }
       customerOrders.createEntity (customers);
-      customerOrders.createEntity(orderlines);
+      customerOrders.createEntity (orders);
+      customerOrders.createEntity (orderlines);
 
 
       // Commit the changes so that the new data persists and is visible to other users.
