@@ -113,6 +113,6 @@ public class Products {
     @Override
     public String toString () {
         return "Product- UPC: " + this.UPC + ", Name: " + this.prod_name + ", Price: " + this.unit_list_price
-                + " QTY on hand: " + this.units_in_stock;
+                + " QTY on hand: " + this.units_in_stock + "\n";
     }
 }

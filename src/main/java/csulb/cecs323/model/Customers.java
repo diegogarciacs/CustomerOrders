@@ -104,7 +104,7 @@ public class Customers {
     @Override
     public String toString () {
         return "Customer- ID: " + this.customer_id + ", Name: " + this.last_name +
-                ", " + this.first_name;
+                ", " + this.first_name + "\n";
     }
     @Override
     public boolean equals (Object o) {

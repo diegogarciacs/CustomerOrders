@@ -100,11 +100,10 @@ public class CustomerOrders {
       customers.add((new Customers("Garcia","Diego","1296 Temple Ave.","90803","5627196643")));
       customers.add((new Customers("Armando","Bloom","4312 Cowboy Rd.","85924","5628195230")));
       customers.add((new Customers("Grando","Ralph","1234 Phillipains","74920","8194442234")));
+      customerOrders.createEntity (customers);
       String com = "Y";
-
-
       while (Objects.equals(com, "Y")){
-         System.out.println("What customer would you like to see? (Number from 1 - )");
+         System.out.println("What customer would you like to see? (Number from 1 - "+ customers.size() +")");
 //         @NamedNativeQuery(
 //                 name  = "getAllEmployees",
 //                 query = "SELECT firstName, lastName" +
@@ -139,13 +138,14 @@ public class CustomerOrders {
             break;
          }
          p.setUnits_in_stock(p.getUnits_in_stock() - numOrders);
+         p.setUnit_list_price(price);
 
 
          orderlines.add(new Order_lines(p,orders.get(orders.size()-1),numOrders));
          System.out.println("Would you like to continue? (Y/N)");
          com = getString();
       }
-      customerOrders.createEntity (customers);
+
       customerOrders.createEntity (orders);
       customerOrders.createEntity (orderlines);
 
