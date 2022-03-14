@@ -15,7 +15,11 @@ package csulb.cecs323.app;
 // Import all of the entity classes that we have written for this application.
 import csulb.cecs323.model.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 import java.util.Scanner;
 import javax.persistence.*;
@@ -80,9 +84,6 @@ public class CustomerOrders {
       EntityTransaction tx = manager.getTransaction();
 
 
-
-
-
       tx.begin();
       // List of Products that I want to persist.  I could just as easily done this with the seed-data.sql
       List <Products> products = new ArrayList<Products>();
@@ -92,29 +93,39 @@ public class CustomerOrders {
       products.add(new Products("012345678910", "4-Volt Max 1/4-in Cordless Screwdriver", "Craftsman", "2", 29.98, 15));
       products.add(new Products("052GBA892003", "4-Volt 1/4-in Cordless Screwdriver", "WORX", "3", 43.44, 20));
       products.add(new Products("BRU852024801", "Steel Head Fiberglass Sledge Hammer", "Kobalt", "4", 19.98, 42));
-      // Create the list of owners in the database.
       customerOrders.createEntity (products);
+      //create Customers arrayList
       List <Customers> customers = new ArrayList<Customers>();
+      //create orderlines arrayList
       List <Order_lines> orderlines = new ArrayList<Order_lines>();
+      //create orders arrayList
       List <Orders> orders = new ArrayList<Orders>();
+      //populate customers
       customers.add((new Customers("Garcia","Diego","1296 Temple Ave.","90803","5627196643")));
       customers.add((new Customers("Armando","Bloom","4312 Cowboy Rd.","85924","5628195230")));
       customers.add((new Customers("Grando","Ralph","1234 Phillipains","74920","8194442234")));
       customerOrders.createEntity (customers);
       String com = "Y";
       while (Objects.equals(com, "Y")){
-         System.out.println("What sales rep would you like to see? (Number from 1 - "+ customers.size() +")");
-//         @NamedNativeQuery(
-//                 name  = "getAllEmployees",
-//                 query = "SELECT firstName, lastName" +
-//                         "FROM Customers",
-//                 resultClass=Customers.class)
-         System.out.println(customers);
+         System.out.println("Who is the customer associated with order? (Number from 1" +
+                 " - "+ customers.size() +")");
+         printCustomers(customers);
          int customer = getIntRange(1, customers.size());
-         System.out.println("Please input information about your order.");
+         System.out.println("******Please input information about your order.******");
+         System.out.println();
          System.out.println("Who's placing the order?");
          String identity = getString();
-         System.out.println(products);
+         System.out.println("Would you like to date this order yourself? (y/n)");
+         String dateChoice = getString();
+         LocalDateTime time = null;
+         if (dateChoice.equalsIgnoreCase("Y")){
+            System.out.println("Please input a valid date in format dd-MM-yyyy HH:mm:ss");
+            String date = getString();
+            time = dateInput(date);
+         } else {
+            time = LocalDateTime.now();
+         }
+         printProducts(products);
          System.out.println("What product would you like to see?(1 - *)");
          int productChoice = getIntRange(1, products.size());
          Products p = products.get(productChoice - 1);
@@ -129,7 +140,7 @@ public class CustomerOrders {
                p = products.get(productChoice - 1);
             }
          }
-         LocalDateTime time = LocalDateTime.now();
+
          orders.add(new Orders(customers.get(customer - 1),time,identity));
          System.out.println("How many of the products would you like to order?");
          int numOrders = getInt();
@@ -166,6 +177,13 @@ public class CustomerOrders {
       LOGGER.fine("End of Transaction");
 
    } // End of the main method
+
+   /**
+    * Function that accepts a range of integers (inclusive) and returns a valid integer within that range.
+    * @param low Inclusive min.
+    * @param high Inclusive max
+    * @return A valid integer from selected range from user.
+    */
    public static int getIntRange( int low, int high ) {
       Scanner in = new Scanner( System.in );
       int input = 0;
@@ -186,6 +204,58 @@ public class CustomerOrders {
       return input;
    }
 
+   /**
+    * This prints all customers in the arraylist to display to the user.
+    * @param c the arraylist object of customers.
+    */
+   public static void printCustomers(List <Customers> c){
+      for (int i = 0; i < c.size(); i++){
+         System.out.println(i+1 + ") "+c.get(i).getFirst_name());
+      }
+   }
+   /**
+    * This prints all products in the arraylist to display to the user.
+    * @param p the arraylist object of products.
+    */
+   public static void printProducts(List <Products> p){
+      for (int i = 0; i < p.size(); i++){
+         System.out.println(i+1 + ") "+p.get(i).getProd_name());
+      }
+   }
+
+   /**
+    * This function checks date input and insures that a user cannot completely put wrong information or a date in
+    * the future for an order.
+    * @param userInput The string input of a user indicating date and time.
+    * @return Returns a LocalDateTime object to be used in the function.
+    */
+   public static LocalDateTime dateInput(String userInput) {
+      DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+      LocalDateTime date = null;
+      LocalDateTime today = LocalDateTime.now();
+      boolean isValid = false;
+      while (!isValid){
+         try {
+            date = LocalDateTime.parse(userInput,dateFormat);
+            if (date.isAfter(today)){
+               Exception DateTimeParseException = null;
+               throw DateTimeParseException;
+            }
+            isValid = true;
+
+         } catch (Exception e){
+            System.out.println("This is not valid.");
+            System.out.println("Please input a valid date in format dd-MM-yyyy HH:mm:ss");
+            userInput = getString();
+         }
+      }
+      return date;
+   }
+
+   /**
+    * Simple function to return a valid integer input from user.
+    * @return valid integer input.
+    */
    public static int getInt() {
       Scanner in = new Scanner(System.in);
       int input = 0;
@@ -202,16 +272,16 @@ public class CustomerOrders {
       return input;
    }
 
+   /**
+    * Function to get valid string input from user.
+    * @return string input.
+    */
    public static String getString() {
       Scanner in = new Scanner( System.in );
       String input = in.nextLine();
       return input;
    }
-   public static void printList(List<Customers> c){
-      for (int i = 0; i<1; i++){
-         System.out.println(c);
-      }
-   }
+
    /**
     * Create and persist a list of objects to the database.
     * @param entities   The list of entities to persist.  These can be any object that has been
