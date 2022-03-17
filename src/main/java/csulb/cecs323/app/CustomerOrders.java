@@ -106,8 +106,8 @@ public class CustomerOrders {
       customers.add((new Customers("Grando","Ralph","1234 Phillipains","74920","8194442234")));
       customerOrders.createEntity (customers);
       String com = "Y";
-      while (Objects.equals(com, "Y")){
-         System.out.println("Who is the customer associated with order? (Number from 1" +
+      while (com.equalsIgnoreCase("Y")){
+         System.out.println("Who is the sales associate making the order? (Number from 1" +
                  " - "+ customers.size() +")");
          printCustomers(customers);
          int customer = getIntRange(1, customers.size());
@@ -126,7 +126,7 @@ public class CustomerOrders {
             time = LocalDateTime.now();
          }
          printProducts(products);
-         System.out.println("What product would you like to see?(1 - *)");
+         System.out.println("What product would you like to see?(1 - "+products.size()+")");
          int productChoice = getIntRange(1, products.size());
          Products p = products.get(productChoice - 1);
          if (p.getUnits_in_stock() == 0){
@@ -134,14 +134,15 @@ public class CustomerOrders {
                System.out.println("We don't have any more of " + p.getProd_name());
                System.out.println("Please choose something else.");
                products.remove(productChoice-1);
-               System.out.println(products);
+               printProducts(products);
+               System.out.println("What product would you like to see?(1 - "+products.size()+")");
 
                productChoice = getIntRange(1,products.size());
                p = products.get(productChoice - 1);
             }
          }
 
-         orders.add(new Orders(customers.get(customer - 1),time,identity));
+
          System.out.println("How many of the products would you like to order?");
          int numOrders = getInt();
          if (p.getUnits_in_stock() < numOrders && p.getUnits_in_stock() != 0){
@@ -150,15 +151,16 @@ public class CustomerOrders {
          }
          double price = p.getUnit_list_price();
          double total = price * numOrders;
-         if (com.equals("Y")){
-            System.out.println("This is your total: " + total);
+         if (com.equalsIgnoreCase("Y")){
+            System.out.println("This would be your total: " + total);
 
             System.out.println("Would you like to continue with this purchase? (Y/N)");
             com = getString();
          }
-         if (com.equals("N")){
+         if (com.equalsIgnoreCase("N")){
             break;
          }
+         orders.add(new Orders(customers.get(customer - 1),time,identity));
          p.setUnits_in_stock(p.getUnits_in_stock() - numOrders);
          p.setUnit_list_price(price);
 
